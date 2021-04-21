@@ -12,13 +12,13 @@
           # 4.1 Summary stats for Table 1
 
 # B: Analysis code
-  # 5. probability of exposure
+  # 5. probability of entry
     # 5.1 Standard movements
     # 5.2 Standard SOQ movements
     # 5.3 VPQO movements
     # 5.4 VPSOQ movements
     # 5.5 Zebra movements
-    # 5.6 What-if analysis - p_exp with no control
+    # 5.6 What-if analysis - p_ent with no control
   # 6. Sensitivity analysis
     #6.1 Standard movements
     #6.2 Standard SOQ movements
@@ -26,7 +26,7 @@
 # C: Model output code 
   # 7. Movement map per municipality
   # 8. P_inf with map output
-  # 9. P_exposure with table and graphics outputs
+  # 9. P_entry with table and graphics outputs
   # 10. Sensitivity analysis outputs - tornado plots
   # 11. What-if scenario with tablular outputs
 
@@ -110,7 +110,6 @@ zip.beta<-as.numeric(fit$estimate[2])
 # Import and unzip repository into working directory
 url <- "https://github.com/UP-COP-SPSRA/ahsv_entry_assessment_zafcontrolledarea/archive/refs/heads/main.zip"
 GET(url, write_disk("manuscriptdata.zip", overwrite = TRUE))
-getwd()
 #unzip file directly into working directory - ensure that the outcome should be a folder with associated data called 
 # ahsv_entry_assessment_zafcontrolledarea-main in the working directory
 
@@ -318,7 +317,7 @@ dfmovement.analyse<-dfmovement.analyse %>% tidyr::complete(movementmonth,
 dfmovement.lmorigins<-unique(dfmovement.analyse$lmgid)
 
 # B: analysis code ####
-# 5. Exposure risk - main analysis####
+# 5. Entry risk - main analysis####
 #5.1 Standard movements ##########
 dfmovement.analyse.standard<-dfmovement.analyse %>% filter(movementtype == 'standard') %>% dplyr::select(-movementtype) # subset data and extract columns needed
 
@@ -356,14 +355,14 @@ for (i in unique(dfmovement.analyse.standard$lmgid)) {# unique area
 p.inf.standard<-p.inf[names(movementtotals.list.standard)]
 
 # 5.1.5 Standard movement outcome ####
-p.exp.standard<-list()
+p.ent.standard<-list()
 
 for (i in names(movementtotals.list.standard)) { #unique areas
   for (j in  names(movementtotals.list.standard[[1]])) { #unique months
     if (movementtotals.list.standard[[i]][[j]][1] != 0){ #if there are at least some movements in that month
-        p.exp.standard[[i]][[j]]<-1-(1-((p.inf.standard[[i]][[j]]*psubclin.standard[[i]][[j]]) + (p.inf.standard[[i]][[j]]*(1-psubclin.standard[[i]][[j]])*(1-pdetect.standard[[i]][[j]]))))^movementtotals.list.standard[[i]][[j]]
+        p.ent.standard[[i]][[j]]<-1-(1-((p.inf.standard[[i]][[j]]*psubclin.standard[[i]][[j]]) + (p.inf.standard[[i]][[j]]*(1-psubclin.standard[[i]][[j]])*(1-pdetect.standard[[i]][[j]]))))^movementtotals.list.standard[[i]][[j]]
     } else {
-      p.exp.standard[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.standard[[i]][[j]]<-replicate(iterations, 0)
     }
   } #END unique months
 } #END unique areas
@@ -466,20 +465,20 @@ for (i in unique(dfmovement.analyse.soq$lmgid)) {
 }
 
 # 5.2.8 SOQ movement output ####
-p.exp.soq.pathway1<-list()
-p.exp.soq.pathway2<-list()
-p.exp.soq<-list()
+p.ent.soq.pathway1<-list()
+p.ent.soq.pathway2<-list()
+p.ent.soq<-list()
 
 for (i in names(movementtotals.list.soq)) { # for every area where soq movements came from
   for (j in  names(movementtotals.list.soq[[1]])) { # for every month of the year
     if (movementtotals.list.soq[[i]][[j]][1] != 0){ # if there are at least some movements
-      p.exp.soq.pathway1[[i]][[j]]<-probclear.soq[[i]][[j]] * ((p.inf.est.soq[[j]] * (1-sensPCR.soq[[i]][[j]]) * psubclin.soq[[i]][[j]]) +  
+      p.ent.soq.pathway1[[i]][[j]]<-probclear.soq[[i]][[j]] * ((p.inf.est.soq[[j]] * (1-sensPCR.soq[[i]][[j]]) * psubclin.soq[[i]][[j]]) +  
         (p.inf.est.soq[[j]] * (1-sensPCR.soq[[i]][[j]]) * (1-psubclin.soq[[i]][[j]]) * (1-pdetect.soq[[i]][[j]])))
-      p.exp.soq.pathway2[[i]][[j]]<-(p.inf.soq[[i]][[j]] * (1-(sensPCR.soq[[i]][[j]]/2)) * psubclin.soq[[i]][[j]]) +  
+      p.ent.soq.pathway2[[i]][[j]]<-(p.inf.soq[[i]][[j]] * (1-(sensPCR.soq[[i]][[j]]/2)) * psubclin.soq[[i]][[j]]) +  
         (p.inf.soq[[i]][[j]] * (1-(sensPCR.soq[[i]][[j]]/2)) * (1-psubclin.soq[[i]][[j]]) * (1-pdetect.soq[[i]][[j]]))
     } else { #no movements in that month
-      p.exp.soq.pathway1[[i]][[j]]<-replicate(iterations, 0)
-      p.exp.soq.pathway2[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.soq.pathway1[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.soq.pathway2[[i]][[j]]<-replicate(iterations, 0)
     }
   }
 }
@@ -487,9 +486,9 @@ for (i in names(movementtotals.list.soq)) { # for every area where soq movements
 
 for (i in names(movementtotals.list.soq)) { # for every lm where soq movements came from
   for (j in  names(movementtotals.list.soq[[1]])) { # for every month of the year
-      p.exp.soq[[i]][[j]]<-1-(1-(p.exp.soq.pathway1[[i]][[j]]+
-                                     p.exp.soq.pathway2[[i]][[j]]-
-                                     (p.exp.soq.pathway1[[i]][[j]]*p.exp.soq.pathway2[[i]][[j]])))^movementtotals.list.soq[[i]][[j]]
+      p.ent.soq[[i]][[j]]<-1-(1-(p.ent.soq.pathway1[[i]][[j]]+
+                                     p.ent.soq.pathway2[[i]][[j]]-
+                                     (p.ent.soq.pathway1[[i]][[j]]*p.ent.soq.pathway2[[i]][[j]])))^movementtotals.list.soq[[i]][[j]]
     
   }
 }
@@ -591,20 +590,20 @@ for (i in unique(dfmovement.analyse.vpqo$lmgid)) {
   }
 }
 # 5.3.8 vpqo movement aggregation ####
-p.exp.vpqo.pathway1<-list()
-p.exp.vpqo.pathway2<-list()
-p.exp.vpqo<-list()
+p.ent.vpqo.pathway1<-list()
+p.ent.vpqo.pathway2<-list()
+p.ent.vpqo<-list()
 
 for (i in names(movementtotals.list.vpqo)) { # for every lm where vpqo movements came from
   for (j in  names(movementtotals.list.vpqo[[1]])) { # for every month of the year
     if (movementtotals.list.vpqo[[i]][[j]][1] != 0){ #if there are at least some movements
-      p.exp.vpqo.pathway1[[i]][[j]]<-probclear.vpqo[[i]][[j]] * ((p.inf.est.vpqo[[j]] * (1-sensPCR.vpqo[[i]][[j]])^2 * psubclin.vpqo[[i]][[j]]) +  
+      p.ent.vpqo.pathway1[[i]][[j]]<-probclear.vpqo[[i]][[j]] * ((p.inf.est.vpqo[[j]] * (1-sensPCR.vpqo[[i]][[j]])^2 * psubclin.vpqo[[i]][[j]]) +  
                                                                         (p.inf.est.vpqo[[j]] * (1-sensPCR.vpqo[[i]][[j]])^2 * (1-psubclin.vpqo[[i]][[j]]) * (1-pdetect.vpqo[[i]][[j]])))
-      p.exp.vpqo.pathway2[[i]][[j]]<-(p.inf.vpqo[[i]][[j]] * (1-(sensPCR.vpqo[[i]][[j]]/2)) * psubclin.vpqo[[i]][[j]]) +  
+      p.ent.vpqo.pathway2[[i]][[j]]<-(p.inf.vpqo[[i]][[j]] * (1-(sensPCR.vpqo[[i]][[j]]/2)) * psubclin.vpqo[[i]][[j]]) +  
         (p.inf.vpqo[[i]][[j]] * (1-(sensPCR.vpqo[[i]][[j]]/2)) * (1-psubclin.vpqo[[i]][[j]]) * (1-pdetect.vpqo[[i]][[j]]))
     } else {
-      p.exp.vpqo.pathway1[[i]][[j]]<-replicate(iterations, 0)
-      p.exp.vpqo.pathway2[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.vpqo.pathway1[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.vpqo.pathway2[[i]][[j]]<-replicate(iterations, 0)
     }
   }
 }
@@ -613,9 +612,9 @@ for (i in names(movementtotals.list.vpqo)) { # for every lm where vpqo movements
 
 for (i in names(movementtotals.list.vpqo)) { # for every lm where vpqo movements came from
   for (j in  names(movementtotals.list.vpqo[[1]])) { # for every month of the year
-    p.exp.vpqo[[i]][[j]]<-1-(1-(p.exp.vpqo.pathway1[[i]][[j]]+
-                                   p.exp.vpqo.pathway2[[i]][[j]]-
-                                   (p.exp.vpqo.pathway1[[i]][[j]]*p.exp.vpqo.pathway2[[i]][[j]])))^movementtotals.list.vpqo[[i]][[j]]
+    p.ent.vpqo[[i]][[j]]<-1-(1-(p.ent.vpqo.pathway1[[i]][[j]]+
+                                   p.ent.vpqo.pathway2[[i]][[j]]-
+                                   (p.ent.vpqo.pathway1[[i]][[j]]*p.ent.vpqo.pathway2[[i]][[j]])))^movementtotals.list.vpqo[[i]][[j]]
     
   }
 }
@@ -706,22 +705,22 @@ for (i in unique(dfmovement.analyse.vpsoq$lmgid)) {
 
 # 5.4.7 VPSOQ movement aggregation ####
 # Note no pathway 2 here - refer to the manuscript
-p.exp.vpsoq<-list()
+p.ent.vpsoq<-list()
 
 for (i in names(movementtotals.list.vpsoq)) { # for every lm where vpsoq movements came from
   for (j in  names(movementtotals.list.vpsoq[[1]])) { # for every month of the year
-    if (movementtotals.list.vpsoq[[i]][[j]][1] != 0){ #if there are at least some movements (i.e. the first element of the movement total list for that area and month then the p.exp is NOT 0 and not 1 which is what you get by powering to 0 for the non mutual exclusive adding of probability)
-      p.exp.vpsoq[[i]][[j]]<-probclear.vpsoq[[i]][[j]] * ((p.inf.vpsoq[[i]][[j]] * (1-sensPCR.vpsoq[[i]][[j]])^2 * psubclin.vpsoq[[i]][[j]]) +  
+    if (movementtotals.list.vpsoq[[i]][[j]][1] != 0){ #if there are at least some movements (i.e. the first element of the movement total list for that area and month then the p.ent is NOT 0 and not 1 which is what you get by powering to 0 for the non mutual exclusive adding of probability)
+      p.ent.vpsoq[[i]][[j]]<-probclear.vpsoq[[i]][[j]] * ((p.inf.vpsoq[[i]][[j]] * (1-sensPCR.vpsoq[[i]][[j]])^2 * psubclin.vpsoq[[i]][[j]]) +  
                                                                         (p.inf.vpsoq[[i]][[j]] * (1-sensPCR.vpsoq[[i]][[j]])^2 * (1-psubclin.vpsoq[[i]][[j]]) * (1-pdetect.vpsoq[[i]][[j]])))
     } else {
-      p.exp.vpsoq[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.vpsoq[[i]][[j]]<-replicate(iterations, 0)
     }
   }
 }
 
 for (i in names(movementtotals.list.vpsoq)) { # for every lm where vpsoq movements came from
   for (j in  names(movementtotals.list.vpsoq[[1]])) { # for every month of the year
-    p.exp.vpsoq[[i]][[j]]<-1-(1-(p.exp.vpsoq[[i]][[j]]
+    p.ent.vpsoq[[i]][[j]]<-1-(1-(p.ent.vpsoq[[i]][[j]]
                                    ))^movementtotals.list.vpsoq[[i]][[j]]
   }
 }
@@ -808,19 +807,19 @@ for (i in unique(dfmovement.analyse.zebq$lmgid)) {
 }
 
 # 5.5.6 Zebra Q movement aggregation ####
-p.exp.zebq.pathway1<-list()
-p.exp.zebq.pathway2<-list()
-p.exp.zebq<-list()
+p.ent.zebq.pathway1<-list()
+p.ent.zebq.pathway2<-list()
+p.ent.zebq<-list()
 
 
 for (i in names(movementtotals.list.zebq)) { # for every lm where zebq movements came from
   for (j in  names(movementtotals.list.zebq[[1]])) { # for every month of the year
-    if (movementtotals.list.zebq[[i]][[j]][1] != 0){ #if there are at least some movements (i.e. the first element of the movement total list for that area and month then the p.exp is NOT 0 and not 1 which is what you get by powering to 0 for the non mutual exclusive adding of probability)
-      p.exp.zebq.pathway1[[i]][[j]]<-probclear.zebq[[i]][[j]] * (p.inf.est.zebq[[j]] * (1-sensPCR.zebq[[i]][[j]])^2)
-      p.exp.zebq.pathway2[[i]][[j]]<-p.inf.zebq[[i]][[j]] * (1-(sensPCR.zebq[[i]][[j]]/2))
+    if (movementtotals.list.zebq[[i]][[j]][1] != 0){ #if there are at least some movements (i.e. the first element of the movement total list for that area and month then the p.ent is NOT 0 and not 1 which is what you get by powering to 0 for the non mutual exclusive adding of probability)
+      p.ent.zebq.pathway1[[i]][[j]]<-probclear.zebq[[i]][[j]] * (p.inf.est.zebq[[j]] * (1-sensPCR.zebq[[i]][[j]])^2)
+      p.ent.zebq.pathway2[[i]][[j]]<-p.inf.zebq[[i]][[j]] * (1-(sensPCR.zebq[[i]][[j]]/2))
     } else {
-      p.exp.zebq.pathway1[[i]][[j]]<-replicate(iterations, 0)
-      p.exp.zebq.pathway2[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.zebq.pathway1[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.zebq.pathway2[[i]][[j]]<-replicate(iterations, 0)
     }
   }
 }
@@ -829,9 +828,9 @@ for (i in names(movementtotals.list.zebq)) { # for every lm where zebq movements
 
 for (i in names(movementtotals.list.zebq)) { # for every lm where zebq movements came from
   for (j in  names(movementtotals.list.zebq[[1]])) { # for every month of the year
-    p.exp.zebq[[i]][[j]]<-1-(1-(p.exp.zebq.pathway1[[i]][[j]]+
-                                     p.exp.zebq.pathway2[[i]][[j]]-
-                                     (p.exp.zebq.pathway1[[i]][[j]]*p.exp.zebq.pathway2[[i]][[j]])))^movementtotals.list.zebq[[i]][[j]]
+    p.ent.zebq[[i]][[j]]<-1-(1-(p.ent.zebq.pathway1[[i]][[j]]+
+                                     p.ent.zebq.pathway2[[i]][[j]]-
+                                     (p.ent.zebq.pathway1[[i]][[j]]*p.ent.zebq.pathway2[[i]][[j]])))^movementtotals.list.zebq[[i]][[j]]
     
   }
 }
@@ -889,14 +888,14 @@ for (i in unique(dfmovement.analyse.nocontrol$lmgid)) { # unique area
 p.inf.nocontrol<-p.inf[names(movementtotals.list.nocontrol)]
 
 # 5.6.5 nocontrol movement aggregation ####
-p.exp.nocontrol<-list()
+p.ent.nocontrol<-list()
 
 for (i in names(movementtotals.list.nocontrol)) { #unique areas
   for (j in  names(movementtotals.list.nocontrol[[1]])) { #unique months
     if (movementtotals.list.nocontrol[[i]][[j]][1] != 0){ #if there are at least some movements in that month
-      p.exp.nocontrol[[i]][[j]]<-1-(1-(p.inf.nocontrol[[i]][[j]]))^movementtotals.list.nocontrol[[i]][[j]]
+      p.ent.nocontrol[[i]][[j]]<-1-(1-(p.inf.nocontrol[[i]][[j]]))^movementtotals.list.nocontrol[[i]][[j]]
     } else {
-      p.exp.nocontrol[[i]][[j]]<-replicate(iterations, 0)
+      p.ent.nocontrol[[i]][[j]]<-replicate(iterations, 0)
     }
   } #END unique months
 } #END unique areas
@@ -904,19 +903,19 @@ for (i in names(movementtotals.list.nocontrol)) { #unique areas
 
 # 6 Sensitivity analysis ####
 # Done prior to aggregation to whole country (i.e. at municipality level)
-# After considering the insubstantial risk of exposure (and lack of movements) through all but the 
+# After considering the insubstantial risk of entry (and lack of movements) through all but the 
 # standard and soq movements, the sensitivity analysis was only performed on standard and standard soq movements,
-# and only for those areas and months where movement took place (i.e. zero risk of exposure was excluded)
+# and only for those areas and months where movement took place (i.e. zero risk of entry was excluded)
 # The SOQ movements were added to get some feeling for incubation, infectious period and PCR sensitivity parameters
 
 # 6.1 Standard movements ####
 
 outputlist.sensitivity.standard<-list()
-for (i in names(p.exp.standard)) { # every lm
-  for (j in names(p.exp.standard[[i]])) { # every month of year
+for (i in names(p.ent.standard)) { # every lm
+  for (j in names(p.ent.standard[[i]])) { # every month of year
     # check that movements occurred
     if (sum(movementtotals.list.standard[[i]][[j]])>0) {
-      outputlist.sensitivity.standard[[paste0(i,'_',j)]]$outputpintro<-p.exp.standard[[i]][[j]] 
+      outputlist.sensitivity.standard[[paste0(i,'_',j)]]$outputpintro<-p.ent.standard[[i]][[j]] 
       outputlist.sensitivity.standard[[paste0(i,'_',j)]]$subclin.pinf<-parameter.subclin.pinf[[i]][[j]]
       outputlist.sensitivity.standard[[paste0(i,'_',j)]]$pinf<-p.inf[[i]][[j]]
       outputlist.sensitivity.standard[[paste0(i,'_',j)]]$subclin.vhc<-psubclin.standard[[i]][[j]]
@@ -927,10 +926,10 @@ for (i in names(p.exp.standard)) { # every lm
 
 # 6.2 SOQ movements ####
 outputlist.sensitivity.soq<-list()
-for (i in names(p.exp.soq)) { # every lm
-  for (j in names(p.exp.soq[[i]])) { # every month of year
+for (i in names(p.ent.soq)) { # every lm
+  for (j in names(p.ent.soq[[i]])) { # every month of year
     if (sum(movementtotals.list.soq[[i]][[j]])>0) {    # check that movements occurred
-      outputlist.sensitivity.soq[[paste0(i,'_',j)]]$outputpintro<-p.exp.soq[[i]][[j]] 
+      outputlist.sensitivity.soq[[paste0(i,'_',j)]]$outputpintro<-p.ent.soq[[i]][[j]] 
       outputlist.sensitivity.soq[[paste0(i,'_',j)]]$subclin.pinf<-parameter.subclin.pinf[[i]][[j]]
       outputlist.sensitivity.soq[[paste0(i,'_',j)]]$pinf_o<-p.inf.est.soq[[j]]
       outputlist.sensitivity.soq[[paste0(i,'_',j)]]$pinf_q<-p.inf.soq[[i]][[j]]
@@ -945,7 +944,7 @@ for (i in names(p.exp.soq)) { # every lm
 
 # C: Model output Code ####
 
-lm_sf <- st_read("./manuscript_risk_exposure_ahs_controlledarea-master/gis/lm.shp")
+lm_sf <- st_read("./ahsv_entry_assessment_zafcontrolledarea-main/gis/lm.shp")
 
 # 7. Figure 1: Map of movements per local municipality ####
 movement.map.annualtotal<-dfmovement.analyse %>% group_by(lmgid) %>% dplyr::summarise(total_annual = sum(total_moved_agg))
@@ -987,44 +986,44 @@ ggsave("./modeloutputs/figures/Figure2.tiff",  width = 6.68, height = 6.68, unit
 p.inf.summarytable.max.spatial <- merge(lm_sf, p.inf.summarytable.max, by.x = "gid", by.y = "lm")
 st_write(p.inf.summarytable.max.spatial, paste0("./modeloutputs/gis/Fig3_MaxPinf.shp"))
 
-# 9: Probability of exposure ####
+# 9: Probability of entry ####
 
-# Bind all p.exp dataframes into a single one after converting list to dataframe
-p.exp.overall.lm.agg.analyse<-rbind(
-  plyr::ldply (p.exp.standard, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "standard"),
-  plyr::ldply (p.exp.soq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "soq"),
-  plyr::ldply (p.exp.vpqo, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "vpqo"),
-  plyr::ldply (p.exp.vpsoq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "vpsoq"),
-  plyr::ldply (p.exp.zebq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "zebq")
+# Bind all p.ent dataframes into a single one after converting list to dataframe
+p.ent.overall.lm.agg.analyse<-rbind(
+  plyr::ldply (p.ent.standard, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "standard"),
+  plyr::ldply (p.ent.soq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "soq"),
+  plyr::ldply (p.ent.vpqo, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "vpqo"),
+  plyr::ldply (p.ent.vpsoq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "vpsoq"),
+  plyr::ldply (p.ent.zebq, data.frame) %>% dplyr::group_by(.id) %>% dplyr::mutate(iteration = row_number(), movementtype = "zebq")
 )
 
-p.exp.overall.lm.agg.analyse$lmgid<-p.exp.overall.lm.agg.analyse$.id #rename local municipality field
-p.exp.overall.lm.agg.analyse<-as.data.frame(p.exp.overall.lm.agg.analyse) #ensure output is dataframe
-p.exp.overall.lm.agg.analyse<-p.exp.overall.lm.agg.analyse %>% dplyr::select(-.id) #drop .id field
+p.ent.overall.lm.agg.analyse$lmgid<-p.ent.overall.lm.agg.analyse$.id #rename local municipality field
+p.ent.overall.lm.agg.analyse<-as.data.frame(p.ent.overall.lm.agg.analyse) #ensure output is dataframe
+p.ent.overall.lm.agg.analyse<-p.ent.overall.lm.agg.analyse %>% dplyr::select(-.id) #drop .id field
 # every month represented by X_monthnumber
 
-#Analysis 9.1: Monthly overall probability of exposure from all areas with all movement types ####
-p.exp.overall<-p.exp.overall.lm.agg.analyse  %>% 
+#Analysis 9.1: Monthly overall probability of entry from all areas with all movement types ####
+p.ent.overall<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of exposure through at least one movement type
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry)  - across municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of entry through at least one movement type
   sapply(., quantile, probs=c(0.025, 0.5, 0.975)) %>% as.data.frame() %>% mutate(estimate = c("2.5%","50%","97.5%")) %>% dplyr::select(-iteration) #summarize outcome with 95% CI
 
 # reorganise data to month, CI range
-p.exp.overall.agg.analyse.all.output<-tidyr::gather(p.exp.overall, month, pexp, -estimate, 5) %>% 
-  pivot_wider(names_from = estimate, values_from = pexp) %>% as.data.frame()
+p.ent.overall.agg.analyse.all.output<-tidyr::gather(p.ent.overall, month, pent, -estimate, 5) %>% 
+  pivot_wider(names_from = estimate, values_from = pent) %>% as.data.frame()
 
 #rename columns and rows 
-p.exp.overall.agg.analyse.all.output<-p.exp.overall.agg.analyse.all.output %>% mutate_all(~gsub("X", "", .)) # drop X from month names
-p.exp.overall.agg.analyse.all.output<-sapply(p.exp.overall.agg.analyse.all.output, as.numeric) %>% as.data.frame()
+p.ent.overall.agg.analyse.all.output<-p.ent.overall.agg.analyse.all.output %>% mutate_all(~gsub("X", "", .)) # drop X from month names
+p.ent.overall.agg.analyse.all.output<-sapply(p.ent.overall.agg.analyse.all.output, as.numeric) %>% as.data.frame()
 #final output
-round_df(p.exp.overall.agg.analyse.all.output, 5)
-write.csv(round_df(p.exp.overall.agg.analyse.all.output, 5), "./modeloutputs/tables/table3_allmovements_monthly.csv")
-write.csv(round_df(p.exp.overall.agg.analyse.all.output, 5), "./modeloutputs/tables/table4_allmovements_monthly_controlled.csv")
+round_df(p.ent.overall.agg.analyse.all.output, 5)
+write.csv(round_df(p.ent.overall.agg.analyse.all.output, 5), "./modeloutputs/tables/table3_allmovements_monthly.csv")
+write.csv(round_df(p.ent.overall.agg.analyse.all.output, 5), "./modeloutputs/tables/table4_allmovements_monthly_controlled.csv")
 
 #Graphing for Plot ####
-ggplot(data = p.exp.overall.agg.analyse.all.output,
+ggplot(data = p.ent.overall.agg.analyse.all.output,
        aes(x = as.factor(month), y = `50%`)) +
   geom_errorbar(
     aes(
@@ -1051,88 +1050,88 @@ ggplot(data = p.exp.overall.agg.analyse.all.output,
 
 ggsave("./modeloutputs/figures/Figure4.tiff",  width = 6.68, height = 6.68, units = "cm",dpi = 300) # size and units as req by PloS
 
-#Analysis 9.2: Overall probability of exposure from all areas with all movement types,  across the year ####
-p.exp.overall.annual<-p.exp.overall.lm.agg.analyse  %>% 
+#Analysis 9.2: Overall probability of entry from all areas with all movement types,  across the year ####
+p.ent.overall.annual<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
+  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-entry)  - across municipalities
   rowwise() %>% 
-  dplyr::mutate(pexp = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") )%>% # for every month (column) probability of exposure through at least one movement type
+  dplyr::mutate(pent = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") )%>% # for every month (column) probability of entry through at least one movement type
   sapply(., quantile, probs=c(0.025, 0.5, 0.975)) %>% as.data.frame() %>% dplyr::select(-iteration)
 
 #final outcome - year around
-write.csv(round_df(p.exp.overall.annual,5), "./modeloutputs/tables/table3_allmovements_annual.csv")
-write.csv(round_df(p.exp.overall.annual,5), "./modeloutputs/tables/table4_allmovements_annual_controlled.csv")
+write.csv(round_df(p.ent.overall.annual,5), "./modeloutputs/tables/table3_allmovements_annual.csv")
+write.csv(round_df(p.ent.overall.annual,5), "./modeloutputs/tables/table4_allmovements_annual_controlled.csv")
 
-# Analysis 9.3: P_exp by movement type - For Table 3####
-p.exp.movementtype<-p.exp.overall.lm.agg.analyse  %>% 
+# Analysis 9.3: P_ent by movement type - For Table 3####
+p.ent.movementtype<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(lmgid)) %>% group_by(movementtype, iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure) - across municipalities
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry) - across municipalities
   mutate_at(vars(contains("X")),function(x) (1-x))
 
-p.exp.movementtype.output<-data.frame()
+p.ent.movementtype.output<-data.frame()
 
-for(i in unique(p.exp.movementtype$movementtype)){
-  subset<-p.exp.movementtype %>% filter(movementtype == i)
+for(i in unique(p.ent.movementtype$movementtype)){
+  subset<-p.ent.movementtype %>% filter(movementtype == i)
   subset.output<-sapply(subset[-1], quantile, probs=c(0.025, 0.5, 0.975)) %>%  #-1 to remove movementtype
     as.data.frame() %>% 
     mutate(estimate = c("2.5%","50%","97.5%")) %>% 
-    dplyr::select(-iteration) %>% tidyr::gather(., month, pexp, -estimate, 5) %>% 
-    pivot_wider(names_from = estimate, values_from = pexp) %>% as.data.frame() %>% mutate_all(~gsub("X", "", .)) %>% 
+    dplyr::select(-iteration) %>% tidyr::gather(., month, pent, -estimate, 5) %>% 
+    pivot_wider(names_from = estimate, values_from = pent) %>% as.data.frame() %>% mutate_all(~gsub("X", "", .)) %>% 
     sapply(., as.numeric) %>% as.data.frame() %>% mutate(movementtype = i)
   
-  p.exp.movementtype.output<-rbind(round_df(subset.output,5), p.exp.movementtype.output)
+  p.ent.movementtype.output<-rbind(round_df(subset.output,5), p.ent.movementtype.output)
 }
 
-write.csv(p.exp.movementtype.output, "./modeloutputs/tables/table3_movementspecific_monthly.csv")
+write.csv(p.ent.movementtype.output, "./modeloutputs/tables/table3_movementspecific_monthly.csv")
 
 # Check which months would have had any movements to differentiate bewteen zero risk and NULL risk for the table
 # This NB for some movement types where 95% CI was (0-0)
 dfmovement.analyse %>% group_by(movementtype, movementmonth) %>% dplyr::summarise(totalmoved = sum(total_moved_agg)) %>% as.data.frame()
 
-#9.4 - cumulative overall p_exp by movement type across the year
-p.exp.overall.annual.movement<-p.exp.overall.lm.agg.analyse  %>% 
+#9.4 - cumulative overall p_ent by movement type across the year
+p.ent.overall.annual.movement<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(lmgid)) %>% group_by(movementtype, iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
+  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-entry)  - across municipalities
   rowwise() %>% 
-  dplyr::mutate(pexp = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X")) %>% 
+  dplyr::mutate(pent = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X")) %>% 
   group_by(movementtype) %>% 
   summarise_all(funs(list(round(quantile(., probs = c(0.025, 0.5, 0.975)),5)))) %>% as.data.frame() %>% dplyr::select(-iteration) %>% 
-  dplyr::mutate(pexp_text=as.character(pexp)) %>% dplyr::select(-pexp)
+  dplyr::mutate(pent_text=as.character(pent)) %>% dplyr::select(-pent)
 
-write.csv(p.exp.overall.annual.movement, "./modeloutputs/tables/table3_movementspecific_annual.csv")
+write.csv(p.ent.overall.annual.movement, "./modeloutputs/tables/table3_movementspecific_annual.csv")
 
-# Analysis 9.5: To get max of the median p_exp by local municipality and retrieve month in which that occurs
-p.exp.overall.lm<-p.exp.overall.lm.agg.analyse  %>% 
+# Analysis 9.5: To get max of the median p_ent by local municipality and retrieve month in which that occurs
+p.ent.overall.lm<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype)) %>% group_by(lmgid, iteration) %>%
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure) - within municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of exposure through at least one movement type
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry) - within municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of entry through at least one movement type
   summarise_all(funs(quantile(., probs = c(0.5)))) %>% as.data.frame() %>% dplyr::select(-iteration) #summarize outcome with 95% CI
 
-colnames(p.exp.overall.lm)<-c("lmgid",c(1:12))
-p.exp.overall.lm.long <- tidyr::gather(p.exp.overall.lm, month, median, '1':'12', factor_key=TRUE) # make long dataset from wide dataset resulting in p.exp per month per lm
-p.exp.overall.lm.long.max<-p.exp.overall.lm.long %>% group_by(lmgid) %>% 
+colnames(p.ent.overall.lm)<-c("lmgid",c(1:12))
+p.ent.overall.lm.long <- tidyr::gather(p.ent.overall.lm, month, median, '1':'12', factor_key=TRUE) # make long dataset from wide dataset resulting in p.ent per month per lm
+p.ent.overall.lm.long.max<-p.ent.overall.lm.long %>% group_by(lmgid) %>% 
   slice_max(median, n = 1, with_ties = FALSE) %>% 
   as.data.frame() #establish the maximum per lm
 
-p.exp.overall.lm.long.max.spatial <- merge(lm_sf, p.exp.overall.lm.long.max, by.x = "gid", by.y = "lmgid") #merge with spatial dataset for mapping
-st_write(p.exp.overall.lm.long.max.spatial, paste0("./modeloutputs/gis/Fig5_maxPexp.shp"))
+p.ent.overall.lm.long.max.spatial <- merge(lm_sf, p.ent.overall.lm.long.max, by.x = "gid", by.y = "lmgid") #merge with spatial dataset for mapping
+st_write(p.ent.overall.lm.long.max.spatial, paste0("./modeloutputs/gis/Fig5_maxPent.shp"))
 
 # Analysis 9.6 - to estabish CI for LM's for paper for LM which is the highest individual per month ####
-# Max individual P_exp per month per LM
-maxlm<-p.exp.overall.lm.long.max %>% slice_max(median, n = 1, with_ties = FALSE) %>% .$lmgid 
+# Max individual P_ent per month per LM
+maxlm<-p.ent.overall.lm.long.max %>% slice_max(median, n = 1, with_ties = FALSE) %>% .$lmgid 
 
-p.exp.overall.lm.CI<-p.exp.overall.lm.agg.analyse  %>% 
+p.ent.overall.lm.CI<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype)) %>% group_by(lmgid, iteration) %>%
-  dplyr::summarise_all(funs(prod)) %>% # probability all movement types result in freedom (non-exposure) - within municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of exposure through at least one movement type
+  dplyr::summarise_all(funs(prod)) %>% # probability all movement types result in freedom (non-entry) - within municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of entry through at least one movement type
   summarise_all(funs(list(round(quantile(., probs = c(0.025, 0.5, 0.975)),5)))) %>% as.data.frame() %>% dplyr::select(-iteration)  %>% tidyr::pivot_longer(cols = starts_with('X'))#summarize outcome with 95% CI
 
-View(p.exp.overall.lm.CI[which(p.exp.overall.lm.CI$lmgid==maxlm),])
+View(p.ent.overall.lm.CI[which(p.ent.overall.lm.CI$lmgid==maxlm),])
 
 # 10 Sensitivity analysis ####
 #base inputs
@@ -1250,136 +1249,135 @@ ggsave("./modeloutputs/figures/Figure7.tiff",  width = 6.68, height = 6.68, unit
 
 
 # 11 - What if analysis (no additional control)####
-# 11.1 Monthly probability of exposure ####
-p.exp.overall.lm.agg.nocontrol.analyse<-
-  plyr::ldply(p.exp.nocontrol, data.frame) %>% 
+# 11.1 Monthly probability of entry ####
+p.ent.overall.lm.agg.nocontrol.analyse<-
+  plyr::ldply(p.ent.nocontrol, data.frame) %>% 
   group_by(.id) %>% 
   dplyr::mutate(iteration = row_number(), movementtype = "nocontrol")
 
-p.exp.overall.lm.agg.nocontrol.analyse$lmgid<-p.exp.overall.lm.agg.nocontrol.analyse$.id #rename local municipality field
-p.exp.overall.lm.agg.nocontrol.analyse<-as.data.frame(p.exp.overall.lm.agg.nocontrol.analyse) #ensure output is dataframe
-p.exp.overall.lm.agg.nocontrol.analyse<-p.exp.overall.lm.agg.nocontrol.analyse %>% dplyr::select(-.id) #drop .id field
+p.ent.overall.lm.agg.nocontrol.analyse$lmgid<-p.ent.overall.lm.agg.nocontrol.analyse$.id #rename local municipality field
+p.ent.overall.lm.agg.nocontrol.analyse<-as.data.frame(p.ent.overall.lm.agg.nocontrol.analyse) #ensure output is dataframe
+p.ent.overall.lm.agg.nocontrol.analyse<-p.ent.overall.lm.agg.nocontrol.analyse %>% dplyr::select(-.id) #drop .id field
 
-p.exp.nocontrol.analyse<-p.exp.overall.lm.agg.nocontrol.analyse  %>% 
+p.ent.nocontrol.analyse<-p.ent.overall.lm.agg.nocontrol.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of exposure through at least one movement type
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry)  - across municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% # for every month (column) probability of entry through at least one movement type
   sapply(., quantile, probs=c(0.025, 0.5, 0.975)) %>% as.data.frame() %>% mutate(estimate = c("2.5%","50%","97.5%")) %>% dplyr::select(-iteration) #summarize outcome with 95% CI
 
 # reorganise data to month, CI range
-p.exp.nocontrol.agg.analyse.all.output<-tidyr::gather(p.exp.nocontrol.analyse, month, pexp, -estimate, 5) %>% 
-  pivot_wider(names_from = estimate, values_from = pexp) %>% as.data.frame() %>% 
+p.ent.nocontrol.agg.analyse.all.output<-tidyr::gather(p.ent.nocontrol.analyse, month, pent, -estimate, 5) %>% 
+  pivot_wider(names_from = estimate, values_from = pent) %>% as.data.frame() %>% 
   mutate_all(~gsub("X", "", .)) %>%  # drop X from month names
   sapply(., as.numeric) %>% as.data.frame() %>% round_df(., 5)
 
 #final output
-write.csv(p.exp.nocontrol.agg.analyse.all.output, "./modeloutputs/tables/table4_whatif_monthly_all_uncontrolled.csv")
+write.csv(p.ent.nocontrol.agg.analyse.all.output, "./modeloutputs/tables/table4_whatif_monthly_all_uncontrolled.csv")
 
-#11.2 - Pexp annual aggregation ####
-p.exp.nocontrol.aggannual.analyse.all.output<-p.exp.overall.lm.agg.nocontrol.analyse  %>% 
+#11.2 - P.ent annual aggregation ####
+p.ent.nocontrol.aggannual.analyse.all.output<-p.ent.overall.lm.agg.nocontrol.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating across municipalities
   dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability freedom across municipalities
   rowwise() %>% 
-  dplyr::mutate(pexp_annual = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") ) %>% # for every month (column) probability of exposure through at least one munic
+  dplyr::mutate(pent_annual = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") ) %>% # for every month (column) probability of entry through at least one munic
   sapply(., quantile, probs=c(0.025, 0.5, 0.975)) %>% as.data.frame() %>% dplyr::select(-iteration) %>% 
   round_df(.,5)
 
-write.csv(p.exp.nocontrol.aggannual.analyse.all.output, "./modeloutputs/tables/table4_whatif_annual_all_uncontrolled.csv")
+write.csv(p.ent.nocontrol.aggannual.analyse.all.output, "./modeloutputs/tables/table4_whatif_annual_all_uncontrolled.csv")
 
 #11.3 Risk differentials ####
-p.exp.overall.nocontrol.annual.nonagg<-p.exp.overall.lm.agg.nocontrol.analyse  %>% 
+p.ent.overall.nocontrol.annual.nonagg<-p.ent.overall.lm.agg.nocontrol.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
+  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-entry)  - across municipalities
   rowwise() %>% 
-  dplyr::mutate(pexp_nocontrol = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X"))
+  dplyr::mutate(pent_nocontrol = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X"))
 
-p.exp.overall.control.annual<-p.exp.overall.lm.agg.analyse  %>% 
+p.ent.overall.control.annual<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
+  dplyr::summarise_all(prod) %>% ungroup() %>% as.data.frame() %>% # probability all movement types result in freedom (non-entry)  - across municipalities
   rowwise() %>% 
-  dplyr::mutate(pexp_control = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") )
+  dplyr::mutate(pent_control = 1-prod(c_across(starts_with("X")))) %>% dplyr::select(-starts_with("X") )
 
-pexp.riskdiffential<-cbind(p.exp.overall.nocontrol.annual.nonagg %>% dplyr::select(-iteration),p.exp.overall.control.annual)
+pent.riskdiffential<-cbind(p.ent.overall.nocontrol.annual.nonagg %>% dplyr::select(-iteration),p.ent.overall.control.annual)
 
 # #overall risk reduction (factor and percentage change)
-p.exp.reduction.annual<-
-  pexp.riskdiffential %>% 
-  mutate(pexp_red = as.numeric(pexp_nocontrol/pexp_control)) %>% 
-  mutate(pexp_red = as.numeric(pexp_red)) %>% 
-  mutate(pexp_diff = as.numeric((pexp_control-pexp_nocontrol)/pexp_nocontrol)) %>% 
-  mutate(pexp_diff = as.numeric(pexp_diff)) %>% 
-  dplyr::select(iteration,  pexp_red, pexp_diff) %>%
-  dplyr::summarise(lower.x.factred = quantile(pexp_red, probs = 0.025),
-                   mean.x.factred = quantile(pexp_red, probs = 0.5),
-                   upper.x.factred = quantile(pexp_red, probs = 0.975),
-                   lower.x.diff = quantile(pexp_diff, probs = 0.025),
-                   mean.x.diff = quantile(pexp_diff, probs = 0.5),
-                   upper.x.diff = quantile(pexp_diff, probs = 0.975)) %>% 
+p.ent.reduction.annual<-
+  pent.riskdiffential %>% 
+  mutate(pent_red = as.numeric(pent_nocontrol/pent_control)) %>% 
+  mutate(pent_red = as.numeric(pent_red)) %>% 
+  mutate(pent_diff = as.numeric((pent_control-pent_nocontrol)/pent_nocontrol)) %>% 
+  mutate(pent_diff = as.numeric(pent_diff)) %>% 
+  dplyr::select(iteration,  pent_red, pent_diff) %>%
+  dplyr::summarise(lower.x.factred = quantile(pent_red, probs = 0.025),
+                   mean.x.factred = quantile(pent_red, probs = 0.5),
+                   upper.x.factred = quantile(pent_red, probs = 0.975),
+                   lower.x.diff = quantile(pent_diff, probs = 0.025),
+                   mean.x.diff = quantile(pent_diff, probs = 0.5),
+                   upper.x.diff = quantile(pent_diff, probs = 0.975)) %>% 
   as.data.frame()
 
 #final output
-write.csv(round_df(p.exp.reduction.annual,5), "./modeloutputs/tables/table4_whatif_annual_riskdiff.csv")
+write.csv(round_df(p.ent.reduction.annual,5), "./modeloutputs/tables/table4_whatif_annual_riskdiff.csv")
 
 # monthly differential in risk
 
-p.exp.monthly.nocontrol.full<-p.exp.overall.lm.agg.nocontrol.analyse  %>% 
+p.ent.monthly.nocontrol.full<-p.ent.overall.lm.agg.nocontrol.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% tidyr::gather(., month, pexp_nocontrol, X1:X12, factor_key=TRUE) %>% 
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry)  - across municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% tidyr::gather(., month, pent_nocontrol, X1:X12, factor_key=TRUE) %>% 
   as.data.frame()
 
-p.exp.monthly.control.full<-p.exp.overall.lm.agg.analyse  %>% 
+p.ent.monthly.control.full<-p.ent.overall.lm.agg.analyse  %>% 
   mutate_at(vars(contains("X")),function(x) (1-x)) %>% # probability of freedom for every data point
   dplyr::select(-c(movementtype,lmgid)) %>% group_by(iteration) %>% # start aggregating different movement types
-  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-exposure)  - across municipalities
-  mutate_at(vars(contains("X")),function(x) (1-x)) %>% tidyr::gather(., month, pexp_control, X1:X12, factor_key=TRUE) %>% 
-  as.data.frame() %>% dplyr::select(pexp_control)
+  dplyr::summarise_all(prod) %>% # probability all movement types result in freedom (non-entry)  - across municipalities
+  mutate_at(vars(contains("X")),function(x) (1-x)) %>% tidyr::gather(., month, pent_control, X1:X12, factor_key=TRUE) %>% 
+  as.data.frame() %>% dplyr::select(pent_control)
 
 #risk differential
-p.exp.differential.month<-
-  cbind(p.exp.monthly.nocontrol.full, p.exp.monthly.control.full) %>% 
-  mutate(pexp_diff = as.numeric((pexp_control-pexp_nocontrol)/pexp_nocontrol)) %>% 
-  mutate(pexp_red = as.numeric(pexp_nocontrol/pexp_control)) %>% 
+p.ent.differential.month<-
+  cbind(p.ent.monthly.nocontrol.full, p.ent.monthly.control.full) %>% 
+  mutate(pent_diff = as.numeric((pent_control-pent_nocontrol)/pent_nocontrol)) %>% 
+  mutate(pent_red = as.numeric(pent_nocontrol/pent_control)) %>% 
   mutate_all(~gsub("X", "", .)) %>% 
   mutate(month = as.numeric(month)) %>% 
-  mutate(pexp_diff = as.numeric(pexp_diff)) %>% 
-  mutate(pexp_red = as.numeric(pexp_red)) %>% 
-  dplyr::select(month,  pexp_diff, pexp_red) %>% group_by(month) %>% 
-  dplyr::summarise(lower.x.diff = quantile(pexp_diff, probs = 0.025),
-                   mean.x.diff = quantile(pexp_diff, probs = 0.5),
-                   upper.x.diff = quantile(pexp_diff, probs = 0.975),
-                   lower.x.factred = quantile(pexp_red, probs = 0.025),
-                   mean.x.factred = quantile(pexp_red, probs = 0.5),
-                   upper.x.factred = quantile(pexp_red, probs = 0.975)) %>% 
+  mutate(pent_diff = as.numeric(pent_diff)) %>% 
+  mutate(pent_red = as.numeric(pent_red)) %>% 
+  dplyr::select(month,  pent_diff, pent_red) %>% group_by(month) %>% 
+  dplyr::summarise(lower.x.diff = quantile(pent_diff, probs = 0.025),
+                   mean.x.diff = quantile(pent_diff, probs = 0.5),
+                   upper.x.diff = quantile(pent_diff, probs = 0.975),
+                   lower.x.factred = quantile(pent_red, probs = 0.025),
+                   mean.x.factred = quantile(pent_red, probs = 0.5),
+                   upper.x.factred = quantile(pent_red, probs = 0.975)) %>% 
   as.data.frame()
 #final output
-write.csv(round_df(p.exp.differential.month,5), "./modeloutputs/tables/table4_whatif_monthly_riskdiff.csv")
+write.csv(round_df(p.ent.differential.month,5), "./modeloutputs/tables/table4_whatif_monthly_riskdiff.csv")
 
 #Jan VPSOQ movements
 dfmovement.analyse %>% filter(movementmonth == 1 & movementtype == 'vpsoq')
 p.inf.summarytable %>% filter(lm == 160 & casemonth == 1)
 
-# Analysis 11.4: NOT IN MAUSCRIPT: To get max of the median p_exp by local municipality and retrieve month in which that occurs ####
+# Analysis 11.4: NOT IN MAUSCRIPT: To get max of the median p_ent by local municipality and retrieve month in which that occurs ####
 # Here because only one movement type (nocontrol) is present there is no need to aggregate across movement types
 # Furthermore becasue the output is LM associated there is no need to aggregate across municipality
 
-p.exp.overall.nocontrol.lm<-p.exp.overall.lm.agg.nocontrol.analyse  %>% 
+p.ent.overall.nocontrol.lm<-p.ent.overall.lm.agg.nocontrol.analyse  %>% 
   dplyr::select(-c(movementtype,iteration)) %>% group_by(lmgid) %>%
   summarise_all(funs(quantile(., probs = c(0.5)))) %>% as.data.frame() #summarize outcome with 95% CI
 
-colnames(p.exp.overall.nocontrol.lm)<-c("lmgid",c(1:12))
-p.exp.overall.nocontrol.lm.long <- tidyr::gather(p.exp.overall.lm, month, median, '1':'12', factor_key=TRUE) # make long dataset from wide dataset resulting in p.exp per month per lm
-p.exp.overall.nocontrol.lm.long.max<-p.exp.overall.nocontrol.lm.long %>% 
+colnames(p.ent.overall.nocontrol.lm)<-c("lmgid",c(1:12))
+p.ent.overall.nocontrol.lm.long <- tidyr::gather(p.ent.overall.lm, month, median, '1':'12', factor_key=TRUE) # make long dataset from wide dataset resulting in p.ent per month per lm
+p.ent.overall.nocontrol.lm.long.max<-p.ent.overall.nocontrol.lm.long %>% 
   group_by(lmgid) %>% 
   slice_max(median, n = 1, with_ties = FALSE) %>% 
   as.data.frame() %>% #establish the maximum per lm
   arrange(as.numeric(lmgid))
 
-p.exp.overall.nocontrol.lm.long.max.spatial <- merge(lm_sf, p.exp.overall.nocontrol.lm.long.max, by.x = "gid", by.y = "lmgid") #merge with spatial dataset for mapping
-st_write(p.exp.overall.nocontrol.lm.long.max.spatial, paste0("./modeloutputs/gis/NIM_pexp_nocontrol.shp"))
-save.image(file = "C:/Users/User/Desktop/Equine RA_R FIles/model_vsubmission_20210226.R")
+p.ent.overall.nocontrol.lm.long.max.spatial <- merge(lm_sf, p.ent.overall.nocontrol.lm.long.max, by.x = "gid", by.y = "lmgid") #merge with spatial dataset for mapping
+st_write(p.ent.overall.nocontrol.lm.long.max.spatial, paste0("./modeloutputs/gis/NIM_pent_nocontrol.shp"))
