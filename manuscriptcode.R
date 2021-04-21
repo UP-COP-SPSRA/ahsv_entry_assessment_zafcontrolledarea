@@ -108,16 +108,16 @@ zip.beta<-as.numeric(fit$estimate[2])
 #Retrieval of data used in analysis####
 #Online from GitHUB
 # Import and unzip repository into working directory
-url <- "https://github.com/UP-COP-SPSRA/ahsv_entry_assessment_zafcontrolledarea/archive/master.zip"
+url <- "https://github.com/UP-COP-SPSRA/ahsv_entry_assessment_zafcontrolledarea/archive/refs/heads/main.zip"
 GET(url, write_disk("manuscriptdata.zip", overwrite = TRUE))
-
+getwd()
 #unzip file directly into working directory - ensure that the outcome should be a folder with associated data called 
-# ahsv_entry_assessment_zafcontrolledarea-master in the working directory
+# ahsv_entry_assessment_zafcontrolledarea-main in the working directory
 
-dfoutbreakdata <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_outbreaks_ca.csv")
-dfmovement <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_2019movements.csv")
-dfcases <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_2019cases_ecod.csv")
-dfcensus <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_census_rsa.csv")
+dfoutbreakdata <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-main/datafiles/data_outbreaks_ca.csv")
+dfmovement <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-main/datafiles/data_2019movements.csv")
+dfcases <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-main/datafiles/data_2019cases_ecod.csv")
+dfcensus <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-main/datafiles/data_census_rsa.csv")
 
 # Data set processing ####
 # 1: Complete AHS cases dataset ####
