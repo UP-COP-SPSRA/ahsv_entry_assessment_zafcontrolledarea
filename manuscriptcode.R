@@ -108,16 +108,16 @@ zip.beta<-as.numeric(fit$estimate[2])
 #Retrieval of data used in analysis####
 #Online from GitHUB
 # Import and unzip repository into working directory
-url <- "https://github.com/UP-COP-SPSRA/manuscript_risk_exposure_ahs_controlledarea/archive/master.zip"
+url <- "https://github.com/UP-COP-SPSRA/ahsv_entry_assessment_zafcontrolledarea/archive/master.zip"
 GET(url, write_disk("manuscriptdata.zip", overwrite = TRUE))
 
 #unzip file directly into working directory - ensure that the outcome should be a folder with associated data called 
-# manuscript_risk_exposure_ahs_controlledarea-master in the working directory
+# ahsv_entry_assessment_zafcontrolledarea-master in the working directory
 
-dfoutbreakdata <-read.csv("./manuscript_risk_exposure_ahs_controlledarea-master/datafiles/data_outbreaks_ca.csv")
-dfmovement <-read.csv("./manuscript_risk_exposure_ahs_controlledarea-master/datafiles/data_2019movements.csv")
-dfcases <-read.csv("./manuscript_risk_exposure_ahs_controlledarea-master/datafiles/data_2019cases_ecod.csv")
-dfcensus <-read.csv("./manuscript_risk_exposure_ahs_controlledarea-master/datafiles/data_census_rsa.csv")
+dfoutbreakdata <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_outbreaks_ca.csv")
+dfmovement <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_2019movements.csv")
+dfcases <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_2019cases_ecod.csv")
+dfcensus <-read.csv("./ahsv_entry_assessment_zafcontrolledarea-master/datafiles/data_census_rsa.csv")
 
 # Data set processing ####
 # 1: Complete AHS cases dataset ####
@@ -1039,7 +1039,7 @@ ggplot(data = p.exp.overall.agg.analyse.all.output,
   geom_point(size = rel(0.5)) +
   theme_bw() +
   xlab("Month of year") +
-  ylab("Median probability of exposure \n with 95% CI") +
+  ylab("Median probability of entry \n with 95% CI") +
   theme(
     axis.line = element_line(colour = "black"),
     axis.title = element_text(size = rel(0.5)),
@@ -1179,7 +1179,7 @@ ggplot() +
   scale_x_continuous(breaks = c(1:nrow(standard.cond.means.df.plot)), 
                      labels = unique(standard.cond.means.df.plot$var)) +
   xlab("Input parameters") +
-  ylab("Parameter conditional mean outcome of probability of exposure\n at local municiaplity level through standard movements") +
+  ylab("Parameter conditional mean outcome of probability of entry\n at local municipality level through standard movements") +
   theme_bw() + 
   theme(
     axis.line = element_line(colour = "black"),
@@ -1234,7 +1234,7 @@ ggplot() +
   scale_x_continuous(breaks = c(1:nrow(soq.cond.means.df.plot)), 
                      labels = unique(soq.cond.means.df.plot$var)) +
   xlab("Input parameters") +
-  ylab("Parameter conditional mean outcome of probability of exposure\n at local municiaplity level through standard SOQ movements") +
+  ylab("Parameter conditional mean outcome of probability of entry\n at local municipality level through standard SOQ movements") +
   theme_bw() + 
   theme(
     axis.line = element_line(colour = "black"),
