@@ -1,10 +1,10 @@
-# An exposure risk assessment of African horse sickness virus into the controlled area of South Africa through the legal movement of equids: Datasets and analysis code
+# An entry risk assessment of African horse sickness virus into the controlled area of South Africa through the legal movement of equids: Datasets and analysis code
 
 ## Introduction
 This repository contains datasets and code used for the manuscript as titled above. All details regarding the data source and considerations that should be noted are discussed in the manuscript - these are important to understand before embarking on any analysis of these data.
 
 ## Referencing this dataset
-John D. Grewar, Johann L. Kotze, Beverly J. Parker, Lesley S. van Helden, Gary Buhrmann, Camilla T. Weyer (2021) An exposure risk assessment of African horse sickness virus into the controlled area of South Africa through the legal movement of equids \[Dataset]\. University of Pretoria - Community of Practice in Sanitary and Phytosanitary Risk Assessment. https://github.com/UP-COP-SPSRA/manuscript_risk_exposure_ahs_controlledarea
+John D. Grewar, Johann L. Kotze, Beverly J. Parker, Lesley S. van Helden, Gary Buhrmann, Camilla T. Weyer (2021) An entry risk assessment of African horse sickness virus into the controlled area of South Africa through the legal movement of equids \[Dataset]\. University of Pretoria - Community of Practice in Sanitary and Phytosanitary Risk Assessment. https://github.com/UP-COP-SPSRA/ahsv_entry_assessment_zafcontrolledarea
 
 ## R Code  
 The descriptive analysis for the manuscript was performed using R. The full code is available in the *manuscriptcode.R* file. Instructions to download this repository for the required datasets used are included in the code as well as the required libraries. 
